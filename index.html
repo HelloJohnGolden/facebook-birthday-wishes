@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Facebook Birthday Wishes</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script>
+    // Load the Facebook SDK asynchronously
+    (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+    // Initialize the SDK
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '598009025264990',
+        cookie     : true,
+        xfbml      : true,
+        version    : 'v12.0'
+      });
+
+      // Check if it's 9am
+      if (moment().hour() === 9) {
+        // Get the list of friends with upcoming birthdays
+        FB.api('/me/friends?fields=name,birthday', function(response) {
+          if (response && !response.error) {
+            // Iterate over the list of friends
+            response.data.forEach(function(friend) {
+              // Check if the friend has a birthday today
+              if (moment(friend.birthday, "MM/DD/YYYY").isSame(moment(), "day")) {
+                // Post a birthday message on the friend's wall
+                FB.api('/' + friend.id + '/feed', 'POST', { message: 'Happy Birthday, ' + friend.name + '! Wishing you an awesome day and a great year ahead!' }, function(response) {
+                  if (response && !response.error) {
+                    console.log('Message posted on ' + friend.name + "'s wall");
+                  } else {
+                    console.error(response.error);
+                  }
+                });
+              }
+            });
+          } else {
+            console.error(response.error);
+          }
+        });
+      }
+    };
+  </script>
+</head>
+<body>
+  <h1>Facebook Birthday Wishes</h1>
+  <p>This app sends a birthday message to your Facebook friends automatically at 9am each morning.</p>
+</body>
+</html>
